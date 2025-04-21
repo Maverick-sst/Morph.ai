@@ -1,16 +1,41 @@
-<<<<<<< HEAD
-# React + Vite
+🚀 Project Vision
+A modern, minimal fitness web app powered by AI — designed to offer real-time coaching, goal tracking, and a personalized experience right from the first visit.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Think: Duolingo meets fitness coaching, but smarter and faster.
 
-Currently, two official plugins are available:
+🛠️ Core Milestones Achieved
+✅ Set up a Vite + React + Tailwind CSS + Framer Motion stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+✅ Designed a clean, glowing landing page with hero, features, and final CTA
 
-## Expanding the ESLint configuration
+✅ Built reusable components for CTA buttons with animations and routing
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# Morph.ai
->>>>>>> 4ea50d55424e32423b640c8b0129882a5bd827db
+✅ Integrated Google Authentication using Firebase
+
+✅ Automated the login process with direct redirection (no extra clicks)
+
+✅ Created a smooth /login → onboarding user journey
+
+✅ Successfully connected and pushed the project to GitHub
+
+🐛 Notable Bugs & Fixes
+
+Issue	Resolution
+Redirect after login not working	Added fallback with setTimeout and verified user object from Firebase
+User data not showing in localStorage	Logged user object + ensured it's parsed properly after redirect
+Google auto-login without account picker	Set prompt: 'select_account' in Firebase provider
+Git push failed due to README in remote	Used --allow-unrelated-histories to merge and push successfully
+LF → CRLF warning on git add .	Acknowledged it's safe, and added .gitattributes for future consistency
+📈 What’s Next
+🧭 Duolingo-style onboarding flow
+
+🧠 Global user context (UserProvider)
+
+🔒 Protected dashboard for authenticated users
+
+🏋️‍♀️ AI coaching interface
+
+💾 Firestore / Supabase to store user goals + workouts
+
+💡 Reflection
+This project is as much about the process as the product. We've made design decisions with the user in mind, resolved issues head-on, and kept things DRY and scalable.
