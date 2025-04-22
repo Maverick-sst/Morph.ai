@@ -1,4 +1,4 @@
-🚀 Project Vision
+# 🚀 Project Vision
 A modern, minimal fitness web app powered by AI — designed to offer real-time coaching, goal tracking, and a personalized experience right from the first visit.
 
 Think: Duolingo meets fitness coaching, but smarter and faster.
