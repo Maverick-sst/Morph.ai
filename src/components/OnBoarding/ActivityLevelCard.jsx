@@ -1,48 +1,56 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { doc, setDoc } from 'firebase/firestore'
+import { db, auth } from '../../firebase'
+import { getGeminiResponse } from '../../utils/gemini'
 
 export default function ActivityLevelCard({ onNext, userData, setUserData }) {
   const [activityInput, setActivityInput] = useState(userData.activityInput || '')
   const [isValid, setIsValid] = useState(false)
-  const [detectedLevel, setDetectedLevel] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setIsValid(activityInput.trim().length >= 10)
   }, [activityInput])
 
-  const detectLevel = (text) => {
-    const lower = text.toLowerCase()
+  const handleNext = async () => {
+    if (!isValid) return
+    setLoading(true)
 
-    if (
-      lower.includes('gym') ||
-      lower.includes('work out') ||
-      lower.includes('training')
-    ) return 'Advanced'
+    const updatedUserData = {
+      ...userData,
+      activityInput,
+    }
 
-    if (
-      lower.includes('walk') ||
-      lower.includes('active') ||
-      lower.includes('move')
-    ) return 'Intermediate'
+    try {
+      const user = auth.currentUser
+      if (!user) throw new Error('User not authenticated')
 
-    return 'Beginner'
-  }
+      // 1. Save to Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        ...updatedUserData,
+        createdAt: new Date(),
+      })
 
-  const handleNext = () => {
-    if (isValid) {
-      const level = detectLevel(activityInput)
-      setDetectedLevel(level)
+      // 2. Ask Gemini AI
+      const aiOutput = await getGeminiResponse(activityInput)
 
-      // Save to userData and proceed
+      // 3. Store in state
       setUserData(prev => ({
         ...prev,
         activityInput,
-        activityLevel: level
+        aiOutput,
       }))
 
+      // 4. Go to FinalStep
       setTimeout(() => {
         onNext()
-      }, 1400) // let the animation message play a bit
+      }, 1000)
+
+    } catch (err) {
+      console.error("🔥 AI or Firestore Error:", err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -56,14 +64,14 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
       className="w-full max-w-md p-6 rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-lg flex flex-col justify-center items-center text-center min-h-[360px]"
     >
       <h2 className="text-white text-xl sm:text-2xl font-semibold mb-4">
-        Describe your usual day
+        Describe your activity level
       </h2>
       <p className="text-white/60 text-sm mb-6">
-        This helps us match your starting level.
+        Tell us about your day so our AI can personalize your plan.
       </p>
 
       <textarea
-        placeholder="e.g. I sit for most of the day but go on walks sometimes"
+        placeholder="e.g. I sit for most of the day but walk every evening."
         value={activityInput}
         onChange={e => setActivityInput(e.target.value)}
         className="w-full h-32 px-4 py-3 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 transition-all resize-none"
@@ -71,26 +79,15 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
 
       <button
         onClick={handleNext}
-        disabled={!isValid}
+        disabled={!isValid || loading}
         className={`mt-6 px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 ${
           isValid
             ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90'
             : 'bg-white/10 text-white/40 cursor-not-allowed'
         }`}
       >
-        Continue
+        {loading ? 'Analyzing with AI...' : 'Continue'}
       </button>
-
-      {detectedLevel && (
-        <motion.p
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="mt-4 text-white/80 text-sm"
-        >
-          Awesome! Based on your answer, you’re <strong>{detectedLevel}</strong> 💪
-        </motion.p>
-      )}
     </motion.div>
   )
 }

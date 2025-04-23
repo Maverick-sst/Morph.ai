@@ -72,7 +72,7 @@ export default function Onboarding() {
     },
     {
       id: "complete",
-      component: <FinalStep />,
+      component: (<FinalStep userData={userData} />)
     },
   ];
 
