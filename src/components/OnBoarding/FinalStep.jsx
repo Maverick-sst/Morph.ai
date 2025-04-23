@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function FinalStep({ userData }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -20,17 +20,17 @@ export default function FinalStep({ userData }) {
       </p>
 
       <div className="bg-white/10 border border-white/20 rounded-xl p-5 text-white/90 text-sm sm:text-base max-h-64 overflow-y-auto whitespace-pre-wrap">
-        {userData.aiOutput || 'Loading...'}
+        {userData.aiOutput || "Loading..."}
       </div>
 
       <motion.button
-        onClick={() => navigate('/dashboard')}
-        className="mt-4 px-8 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl font-medium hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all"
+        onClick={() => navigate("/crafting")}
+        className="mt-4 px-8 py-3 bg-[#9400FF] text-white rounded-xl font-medium hover:opacity-90 transition-all"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
         Go to Dashboard →
       </motion.button>
     </motion.div>
-  )
+  );
 }
