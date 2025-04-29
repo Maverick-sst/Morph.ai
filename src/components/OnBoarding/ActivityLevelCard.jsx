@@ -2,17 +2,16 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { doc, setDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase";
-import { getGeminiResponse } from "../../utils/gemini";
 import { BsPlus } from "react-icons/bs";
-
-export default function ActivityLevelCard({ onNext, userData, setUserData }) {
+import { useNavigate } from "react-router-dom";
+export default function ActivityLevelCard({ userData, setUserData }) {
   const [activityInput, setActivityInput] = useState(
     userData.activityInput || ""
   );
-  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+  const [selectedSuggestions, setSelectedSuggestions] = useState([]);
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     setIsValid(activityInput.trim().length >= 10);
   }, [activityInput]);
@@ -35,19 +34,13 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
         createdAt: new Date(),
       });
 
-      const aiOutput = await getGeminiResponse(updatedUserData.activityInput);
-
-      setUserData((prev) => ({
-        ...prev,
-        activityInput: updatedUserData.activityInput,
-        aiOutput,
-      }));
+      setUserData(updatedUserData);
 
       setTimeout(() => {
-        onNext();
+        navigate("/crafting");
       }, 1000);
     } catch (err) {
-      console.error("🔥 AI or Firestore Error:", err);
+      console.error("🔥 Firestore Error:", err);
     } finally {
       setLoading(false);
     }
@@ -71,29 +64,29 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
 
   const handleSuggestionClick = (text, index) => {
     const formatted = text.trim();
-    const alreadySelected = selectedSuggestion === index;
-    const input = activityInput.trim();
+    const alreadySelected = selectedSuggestions.includes(index);
+    let updatedInput = activityInput.trim();
 
     if (alreadySelected) {
-      // Unselect + remove the sentence from the input
-      const updated = input
+      // Unselect ➔ Remove the sentence cleanly
+      updatedInput = updatedInput
         .replace(new RegExp(`(?:\\.\\s*|^)${formatted}(?=\\.|$)`, "g"), "")
         .replace(/\s+/g, " ")
         .trim();
 
-      setActivityInput(updated);
-      setSelectedSuggestion(null);
+      setSelectedSuggestions(selectedSuggestions.filter((i) => i !== index));
     } else {
-      // Select + add the sentence
-      const updated = input
-        ? input.endsWith(".")
-          ? `${input} ${formatted}`
-          : `${input}. ${formatted}`
+      // Select ➔ Add sentence smartly
+      updatedInput = updatedInput
+        ? updatedInput.endsWith(".")
+          ? `${updatedInput} ${formatted}`
+          : `${updatedInput}. ${formatted}`
         : formatted;
 
-      setActivityInput(updated.trim());
-      setSelectedSuggestion(index);
+      setSelectedSuggestions([...selectedSuggestions, index]);
     }
+
+    setActivityInput(updatedInput.trim());
   };
 
   return (
@@ -118,8 +111,9 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
         value={activityInput}
         onChange={(e) => {
           setActivityInput(e.target.value);
-          setSelectedSuggestion(null); // clear suggestion highlight on manual input
+          setSelectedSuggestions([]);  // Clear all selections if typing manually
         }}
+        
         className="w-full h-32 px-4 py-3 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 transition-all resize-none mb-6"
       />
 
@@ -132,7 +126,7 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
             onClick={() => handleSuggestionClick(text, i)}
             className={`text-sm px-3 py-1.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white font-medium flex items-center gap-1 transition duration-200 
               ${
-                selectedSuggestion === i
+                selectedSuggestions.includes(i)
                   ? "ring-2 ring-white/80 shadow-white shadow-sm"
                   : ""
               }
@@ -154,7 +148,7 @@ export default function ActivityLevelCard({ onNext, userData, setUserData }) {
             : "bg-white/10 text-white/40 cursor-not-allowed"
         }`}
       >
-        {loading ? "Analyzing with AI..." : "Continue"}
+        {loading ? "Saving..." : "Continue"}
       </button>
     </motion.div>
   );

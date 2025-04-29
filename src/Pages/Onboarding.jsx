@@ -6,7 +6,6 @@ import WelcomeScreen from "../components/OnBoarding/WelcomeScreen";
 import UsernameStep from "../components/OnBoarding/UsernameStep";
 import MetricsCard from "../components/OnBoarding/MetricsCard";
 import ActivityLevelCard from "../components/OnBoarding/ActivityLevelCard";
-import FinalStep from "../components/OnBoarding/FinalStep";
 
 export default function Onboarding() {
   const [step, setStep] = useState(0);
@@ -69,10 +68,6 @@ export default function Onboarding() {
           onNext={nextStep}
         />
       ),
-    },
-    {
-      id: "complete",
-      component: (<FinalStep userData={userData} />)
     },
   ];
 
